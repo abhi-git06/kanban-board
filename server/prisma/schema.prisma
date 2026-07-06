@@ -1,0 +1,348 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER
+// ============================================
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  avatarUrl String?
+  role      UserRole @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Owned boards
+  ownedBoards Board[] @relation("BoardOwner")
+
+  // Board memberships
+  boardMembers BoardMember[]
+
+  // Tasks assigned to this user
+  assignedTasks Task[] @relation("TaskAssignee")
+
+  // Tasks created by this user
+  createdTasks Task[] @relation("TaskCreator")
+
+  // Tasks last updated by this user
+  updatedTasks Task[] @relation("TaskUpdater")
+
+  // Comments written by this user
+  comments Comment[]
+
+  // Attachments uploaded by this user
+  attachments Attachment[]
+
+  // Activity logs triggered by this user
+  activityLogs ActivityLog[]
+
+  // Refresh tokens for auth
+  refreshTokens RefreshToken[]
+
+  @@index([email])
+  @@map("users")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+// ============================================
+// BOARD
+// ============================================
+model Board {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+  isArchived  Boolean @default(false)
+  isFavourite Boolean @default(false)
+
+  ownerId String
+  owner   User   @relation("BoardOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Columns in this board
+  columns Column[]
+
+  // Tasks in this board
+  tasks Task[]
+
+  // Members with access
+  members BoardMember[]
+
+  @@index([ownerId])
+  @@index([isArchived])
+  @@index([isFavourite])
+  @@map("boards")
+}
+
+// ============================================
+// BOARD MEMBER (Junction)
+// ============================================
+model BoardMember {
+  id   String           @id @default(uuid())
+  role BoardMemberRole  @default(MEMBER)
+
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+
+  @@unique([boardId, userId])
+  @@index([boardId])
+  @@index([userId])
+  @@map("board_members")
+}
+
+enum BoardMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+// ============================================
+// COLUMN
+// ============================================
+model Column {
+  id    Int    @id @default(autoincrement())
+  title String
+  order Int    @default(0)
+
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Tasks in this column
+  tasks Task[]
+
+  @@index([boardId])
+  @@index([order])
+  @@map("columns")
+}
+
+// ============================================
+// TASK
+// ============================================
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  priority    Priority  @default(MEDIUM)
+  status      Status    @default(BACKLOG)
+  dueDate     DateTime?
+  order       Int       @default(0)
+
+  boardId String
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  columnId String
+  column   Column @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  assignedToId String?
+  assignedTo   User?  @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  createdById String
+  createdBy   User   @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  updatedById String?
+  updatedBy   User?  @relation("TaskUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Labels (many-to-many)
+  labels TaskLabel[]
+
+  // Checklist items
+  checklist ChecklistItem[]
+
+  // Comments
+  comments Comment[]
+
+  // Attachments
+  attachments Attachment[]
+
+  // Activity logs
+  activityLogs ActivityLog[]
+
+  @@index([boardId])
+  @@index([columnId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([priority])
+  @@index([dueDate])
+  @@index([order])
+  @@map("tasks")
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum Status {
+  BACKLOG
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+// ============================================
+// LABEL
+// ============================================
+model Label {
+  id    String @id @default(uuid())
+  name  String
+  color String @default("#3B82F6")
+
+  createdAt DateTime @default(now())
+
+  // Tasks using this label
+  tasks TaskLabel[]
+
+  @@unique([name])
+  @@map("labels")
+}
+
+// ============================================
+// TASK LABEL (Junction)
+// ============================================
+model TaskLabel {
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  labelId String
+  label   Label  @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  assignedAt DateTime @default(now())
+
+  @@id([taskId, labelId])
+  @@index([taskId])
+  @@index([labelId])
+  @@map("task_labels")
+}
+
+// ============================================
+// CHECKLIST ITEM
+// ============================================
+model ChecklistItem {
+  id          String  @id @default(uuid())
+  text        String
+  isCompleted Boolean @default(false)
+  order       Int     @default(0)
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([order])
+  @@map("checklist_items")
+}
+
+// ============================================
+// COMMENT
+// ============================================
+model Comment {
+  id      String @id @default(uuid())
+  content String
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("comments")
+}
+
+// ============================================
+// ATTACHMENT
+// ============================================
+model Attachment {
+  id       String @id @default(uuid())
+  fileName String
+  fileUrl  String
+  fileType String
+  fileSize Int
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([taskId])
+  @@index([uploadedById])
+  @@map("attachments")
+}
+
+// ============================================
+// ACTIVITY LOG
+// ============================================
+model ActivityLog {
+  id      String  @id @default(uuid())
+  action  String
+  details String?
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([taskId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+// ============================================
+// REFRESH TOKEN
+// ============================================
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
