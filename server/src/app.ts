@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { corsOptions } from './config/cors';
@@ -19,7 +20,7 @@ export function createApp(): express.Application {
 
   // Security middleware
   app.use(helmet());
-  app.use(corsOptions);
+  app.use(cors(corsOptions));
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
 
