@@ -34,7 +34,7 @@ export const reorderColumnsSchema = z.object({
     boardId: z.string().uuid('Invalid board ID'),
     columns: z.array(
       z.object({
-        columnId: z.number().int().min(0, 'Invalid column ID'),
+        columnId: z.string().min(1, 'Invalid column ID'),
         newOrder: z.number().int().min(0, 'Invalid order'),
       })
     ).min(1, 'At least one column is required'),
