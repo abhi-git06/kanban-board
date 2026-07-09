@@ -35,4 +35,7 @@ export const commentSchema = z.object({
   content: z.string().min(1, 'Comment cannot be empty').max(1000, 'Comment is too long'),
 });
 
-export type LoginFormData
+export type LoginFormData = z.infer<typeof loginSchema>;
+export type RegisterFormData = z.infer<typeof registerSchema>;
+export type CreateBoardFormData = z.infer<typeof createBoardSchema>;
+export type CreateTaskFormData = z.infer<typeof createTaskSchema>;

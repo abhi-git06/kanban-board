@@ -22,15 +22,28 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor — handle 401 Unauthorized globally
+// Response interceptor — unwrap the API's { success, data, message } envelope
+// so callers can keep treating `response.data` as the actual payload, and
+// surface the backend's real error message for catch blocks that read err.message
 api.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError) => {
+  (response) => {
+    if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
+  (error: AxiosError<{ error?: { message?: string } }>) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       window.location.href = '/login';
     }
+
+    const backendMessage = error.response?.data?.error?.message;
+    if (backendMessage) {
+      error.message = backendMessage;
+    }
+
     return Promise.reject(error);
   }
 );
