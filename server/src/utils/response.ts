@@ -44,8 +44,8 @@ export function sendError(
     success: false,
     error: {
       message,
-      ...(code && { code }),
-      ...(details && { details }),
+      ...(code ? { code } : {}),
+      ...(details !== undefined ? { details } : {}),
     },
     statusCode,
   };
