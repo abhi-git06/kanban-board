@@ -2,7 +2,7 @@ import { prisma } from '../config/database';
 import { Prisma } from '@prisma/client';
 import { CreateBoardInput, UpdateBoardInput, BoardWithRelations } from '../types/board';
 
-const boardListSelect: Prisma.BoardSelect = {
+const boardListSelect = {
   id: true,
   title: true,
   description: true,
@@ -60,7 +60,7 @@ const boardListSelect: Prisma.BoardSelect = {
       },
     },
   },
-};
+} satisfies Prisma.BoardSelect;
 
 export const boardRepository = {
   async findById(id: string): Promise<BoardWithRelations | null> {

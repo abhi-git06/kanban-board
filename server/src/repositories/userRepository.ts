@@ -2,7 +2,7 @@ import { prisma } from '../config/database';
 import { User, Prisma } from '@prisma/client';
 import { CreateUserInput, UpdateUserInput, UserWithoutPassword } from '../types/auth';
 
-const userSelectWithoutPassword: Prisma.UserSelect = {
+const userSelectWithoutPassword = {
   id: true,
   email: true,
   name: true,
@@ -10,7 +10,7 @@ const userSelectWithoutPassword: Prisma.UserSelect = {
   role: true,
   createdAt: true,
   updatedAt: true,
-};
+} satisfies Prisma.UserSelect;
 
 export const userRepository = {
   async findById(id: string): Promise<UserWithoutPassword | null> {

@@ -1,4 +1,5 @@
 import { prisma } from '../config/database';
+import { Prisma } from '@prisma/client';
 import { CreateTaskInput, UpdateTaskInput, ReorderTaskInput, CreateChecklistItemInput, CreateCommentInput } from '../types/task';
 
 const taskInclude = {
@@ -45,7 +46,7 @@ const taskInclude = {
     },
     orderBy: { createdAt: 'asc' },
   },
-};
+} satisfies Prisma.TaskInclude;
 
 export const taskRepository = {
   async findById(id: string) {
