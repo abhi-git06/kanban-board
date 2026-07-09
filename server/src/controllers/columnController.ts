@@ -18,7 +18,7 @@ export const columnController = {
   async getColumn(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as AuthenticatedRequest).user!.userId;
-      const id = parseInt(req.params.id);
+      const { id } = req.params;
       const column = await columnService.getColumn(id, userId);
       sendSuccess(res, column, 200);
     } catch (error) {
@@ -39,7 +39,7 @@ export const columnController = {
   async updateColumn(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as AuthenticatedRequest).user!.userId;
-      const id = parseInt(req.params.id);
+      const { id } = req.params;
       const column = await columnService.updateColumn(id, req.body, userId);
       sendSuccess(res, column, 200, 'Column updated successfully');
     } catch (error) {
@@ -50,7 +50,7 @@ export const columnController = {
   async deleteColumn(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as AuthenticatedRequest).user!.userId;
-      const id = parseInt(req.params.id);
+      const { id } = req.params;
       await columnService.deleteColumn(id, userId);
       sendSuccess(res, null, 200, 'Column deleted successfully');
     } catch (error) {

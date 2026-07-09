@@ -2,7 +2,7 @@ import { prisma } from '../config/database';
 import { CreateColumnInput, UpdateColumnInput, ReorderColumnInput } from '../types/column';
 
 export const columnRepository = {
-  async findById(id: number) {
+  async findById(id: string) {
     return prisma.column.findUnique({
       where: { id },
       include: {
@@ -77,7 +77,7 @@ export const columnRepository = {
     });
   },
 
-  async update(id: number, data: UpdateColumnInput) {
+  async update(id: string, data: UpdateColumnInput) {
     return prisma.column.update({
       where: { id },
       data,
@@ -87,7 +87,7 @@ export const columnRepository = {
     });
   },
 
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     await prisma.column.delete({
       where: { id },
     });

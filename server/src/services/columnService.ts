@@ -25,7 +25,7 @@ export const columnService = {
     return columnRepository.findByBoardId(boardId);
   },
 
-  async getColumn(columnId: number, userId: string) {
+  async getColumn(columnId: string, userId: string) {
     const column = await columnRepository.findById(columnId);
     if (!column) {
       throw new ApiError('Column not found', 404, 'NOT_FOUND');
@@ -49,7 +49,7 @@ export const columnService = {
   },
 
   async updateColumn(
-    columnId: number,
+    columnId: string,
     data: UpdateColumnInput,
     userId: string
   ) {
@@ -65,7 +65,7 @@ export const columnService = {
     return columnRepository.update(columnId, data);
   },
 
-  async deleteColumn(columnId: number, userId: string): Promise<void> {
+  async deleteColumn(columnId: string, userId: string): Promise<void> {
     const column = await this.getColumn(columnId, userId);
 
     // Check write permissions

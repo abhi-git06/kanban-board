@@ -1,3 +1,5 @@
+import { Priority, Status } from '@prisma/client';
+
 export interface CreateColumnInput {
   boardId: string;
   title: string;
@@ -9,12 +11,12 @@ export interface UpdateColumnInput {
 }
 
 export interface ReorderColumnInput {
-  columnId: number;
+  columnId: string;
   newOrder: number;
 }
 
 export interface ColumnWithTasks {
-  id: number;
+  id: string;
   boardId: string;
   title: string;
   order: number;
@@ -24,8 +26,8 @@ export interface ColumnWithTasks {
     id: string;
     title: string;
     description: string | null;
-    priority: string;
-    status: string;
+    priority: Priority;
+    status: Status;
     dueDate: Date | null;
     order: number;
     assignedToId: string | null;

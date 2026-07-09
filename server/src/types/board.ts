@@ -1,4 +1,4 @@
-import { BoardMemberRole } from '@prisma/client';
+import { BoardMemberRole, Priority, Status } from '@prisma/client';
 
 export interface CreateBoardInput {
   title: string;
@@ -49,14 +49,14 @@ export interface BoardWithRelations {
     };
   }[];
   columns: {
-    id: number;
+    id: string;
     title: string;
     order: number;
     tasks: {
       id: string;
       title: string;
-      priority: string;
-      status: string;
+      priority: Priority;
+      status: Status;
       dueDate: Date | null;
       order: number;
       assignedToId: string | null;

@@ -75,7 +75,7 @@ export const taskService = {
     await checkWriteAccess(data.boardId, userId);
 
     // Verify column exists and belongs to board
-    const column = await columnRepository.findById(parseInt(data.columnId));
+    const column = await columnRepository.findById(data.columnId);
     if (!column || column.boardId !== data.boardId) {
       throw new ApiError('Column not found in this board', 404, 'NOT_FOUND');
     }
@@ -127,7 +127,7 @@ export const taskService = {
       changes.push(`priority to ${data.priority}`);
     }
     if (data.columnId && data.columnId !== existingTask.columnId) {
-      const newColumn = await columnRepository.findById(parseInt(data.columnId));
+      const newColumn = await columnRepository.findById(data.columnId);
       changes.push(`column to "${newColumn?.title || 'Unknown'}"`);
     }
 
@@ -164,7 +164,7 @@ export const taskService = {
     await checkWriteAccess(task.boardId, userId);
 
     // Verify target column exists
-    const targetColumn = await columnRepository.findById(parseInt(data.targetColumnId));
+    const targetColumn = await columnRepository.findById(data.targetColumnId);
     if (!targetColumn || targetColumn.boardId !== task.boardId) {
       throw new ApiError('Target column not found in this board', 404, 'NOT_FOUND');
     }
